@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const imgUrl = "&extras=url_m"; // get the url of the image
     const plainJson = "&nojsoncallback=true"; // to get response in json instead of jsonp
     let searchPhrase = '';
+    let myGalleryContainer = document.getElementById('my-custom-gallery');
     flickrEndpoint+= myApiKey + methodSearch + formatResponse + photosAmount + imgUrl + plainJson;//just concat it in one request
 
     const searchForm = document.getElementById('search_form');
@@ -67,15 +68,17 @@ document.addEventListener('DOMContentLoaded', function(){
                 } else {
                     wholePhotos = JSON.parse(reqSearch.responseText);
                     wholePhotos = wholePhotos.photos.photo;
-                    doRenderImages(wholePhotos);
-                    // console.log(wholePhotos);
-                    // console.log(reqSearch.responseText);
-                    //now we have array of objects - images
-                    //lets render it one by one as html elements
+                    if(wholePhotos.length > 0){
+                        doRenderImages(wholePhotos);
+                        console.log(wholePhotos);
+                        console.log(reqSearch.responseText);
+                        searchForm.reset();
+                        renderedPhotoItem = document.getElementsByClassName('one-gallery-item');
+                        showGalleryBtn.classList.remove('disabled');
+                    } else {
+                        alert('could not find any picture for this word');
+                    }
 
-                    searchForm.reset();
-                    renderedPhotoItem = document.getElementsByClassName('one-gallery-item');
-                    showGalleryBtn.classList.remove('disabled');
                     // console.log(renderedPhotoItem);
                 }
             };
@@ -107,10 +110,12 @@ document.addEventListener('DOMContentLoaded', function(){
             let showGalleryBtn = e.target;
             if(!showGalleryBtn.classList.contains('disabled')) {
                 if(typeof selectedPics !== "undefined" && selectedPics.length > 0) {
-                    // let myGallery = selectedPics.map(function(){
-
-                    // });
-                    console.log(Object.values(selectedPics) + ' here are your images!!!');
+                    let myGallery = Object.values(selectedPics);
+                    for(let key in myGallery) {
+                        // myGalleryContainer.appendChild(myGallery[key]);
+                        console.log(myGallery[key]);
+                    }
+                    console.log(' here are your images!!!');
                 } else {
                     alert('your gallery is empty, my lord');
                 }
