@@ -42,9 +42,11 @@ body {
     padding: 30px;
 }
 
-.search-form .form-title {
+.title {
     font-size: 1.3em;
     color: #fff;
+    margin: 20px auto;
+    width: 100%;
     text-align: center;
 }
 

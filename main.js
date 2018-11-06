@@ -7,16 +7,22 @@ document.addEventListener('DOMContentLoaded', function(){
     const imgUrl = "&extras=url_m"; // get the url of the image
     const plainJson = "&nojsoncallback=true"; // to get response in json instead of jsonp
     let searchPhrase = '';
-    let myGalleryContainer = document.getElementById('my-custom-gallery');
+
     flickrEndpoint+= myApiKey + methodSearch + formatResponse + photosAmount + imgUrl + plainJson;//just concat it in one request
 
+    //getting elements from DOM
+    const showGalleryBtn = document.getElementById('show_gallery');
+    const myGalleryContainer = document.getElementById('my-custom-gallery');
+    const foundPhotosContainer = document.getElementById('images-from-flickr');
     const searchForm = document.getElementById('search_form');
     document.getElementById('search_input').focus(); // set autofocus to input on page load
-    let renderedPhotoItem = '';
-    let showGalleryBtn = document.getElementById('show_gallery');
+
+
+    let renderedPhotoItem = ''; // here will be single photo
+
 
     //validate search form on submit event
-    //@param searchPhrase taken from user input
+    //searchPhrase taken from user input
     //on successful validation perform search and render result
     searchForm.addEventListener('submit', function(event) {
         event.preventDefault();
@@ -25,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function(){
             alert('Search field must contain any text!');
             return false
         } else {
-            document.getElementById('images-from-flickr').innerHTML = '';
+            foundPhotosContainer.innerHTML = '';
             doSearch();
         }
     });
@@ -49,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function(){
             imageElement.title = singleListObject.title;
             imgTitle.innerText = singleListObject.title;
             onePicsItem.innerHTML += imgTitle.outerHTML + imageElement.outerHTML;
-            document.getElementById('images-from-flickr').appendChild(onePicsItem);
+            foundPhotosContainer.appendChild(onePicsItem);
         }
     }
 
@@ -58,7 +64,6 @@ document.addEventListener('DOMContentLoaded', function(){
     function doSearch() {
         let reqSearch = new XMLHttpRequest();
         flickrEndpoint += '&text=' + searchPhrase;
-        console.log(searchPhrase);
         let wholePhotos = []; // here will be all the photos grabbed from API
             reqSearch.open("GET", flickrEndpoint, true, 'mob_dev', 'asdfasdf');
             reqSearch.send();
@@ -70,52 +75,60 @@ document.addEventListener('DOMContentLoaded', function(){
                     wholePhotos = wholePhotos.photos.photo;
                     if(wholePhotos.length > 0){
                         doRenderImages(wholePhotos);
-                        console.log(wholePhotos);
-                        console.log(reqSearch.responseText);
                         searchForm.reset();
                         renderedPhotoItem = document.getElementsByClassName('one-gallery-item');
                         showGalleryBtn.classList.remove('disabled');
                     } else {
                         alert('could not find any picture for this word');
                     }
-
-                    // console.log(renderedPhotoItem);
                 }
             };
     }
 
+    //
+    // listen to what photos add to gallery
+    //
+
     let selectedPics = [];
-    document.getElementById('images-from-flickr').addEventListener('click', function(evt){
+    foundPhotosContainer.addEventListener('click', function(evt){
         let clickedPic = evt.target;
         clickedPic.classList.toggle('active');
         if(clickedPic.classList.contains('active')){
-            selectedPics.push(clickedPic.outerHTML);
-            // console.log('added class');
-            console.log(selectedPics);
-            console.log('added to arr');
-            return selectedPics = Array.from(selectedPics);
+            selectedPics.push(clickedPic.innerHTML);
+            return selectedGalleryPics = Array.from(selectedPics);
         } else {
             if(selectedPics !== ''){
-                selectedPics.pop(clickedPic.outerHTML);
-                console.log(selectedPics);
-                console.log('removed from arr');
+                selectedPics.pop(clickedPic.innerHTML);
             }
-            console.log('removed class');
         }
     });
 
+        //
+        // a lot of manipulation on click, creating a gallery and rendering it
+        //
+
         showGalleryBtn.addEventListener('click', function(e){
             e.preventDefault();
-            console.log(e.target);
+            let myGallery = [];
+            myGalleryContainer.innerHTML = '';
             let showGalleryBtn = e.target;
             if(!showGalleryBtn.classList.contains('disabled')) {
-                if(typeof selectedPics !== "undefined" && selectedPics.length > 0) {
-                    let myGallery = Object.values(selectedPics);
-                    for(let key in myGallery) {
-                        // myGalleryContainer.appendChild(myGallery[key]);
-                        console.log(myGallery[key]);
+                if(typeof selectedGalleryPics !== "undefined" && selectedPics.length > 0) {
+                    myGallery = Object.values(selectedGalleryPics);
+                    let galleryTitle = document.createElement('h3');
+                    galleryTitle.innerText = "It's your selected photos";
+                    galleryTitle.classList.add('title');
+                    myGalleryContainer.appendChild(galleryTitle);
+                    for(let one in myGallery) {
+                        let objectMyGal = {
+                          element: myGallery[one]
+                        };
+                        let gallerylistWrap = document.createElement('li');
+                        gallerylistWrap.classList.add('one-gallery-item');
+                        gallerylistWrap.innerHTML = objectMyGal.element;
+                        myGalleryContainer.appendChild(gallerylistWrap);
                     }
-                    console.log(' here are your images!!!');
+                    foundPhotosContainer.innerHTML = '';
                 } else {
                     alert('your gallery is empty, my lord');
                 }
